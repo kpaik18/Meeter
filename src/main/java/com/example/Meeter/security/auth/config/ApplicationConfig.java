@@ -1,6 +1,6 @@
-package com.example.Meeter.security.config;
+package com.example.Meeter.security.auth.config;
 
-import com.example.Meeter.security.user.UserRepository;
+import com.example.Meeter.security.auth.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

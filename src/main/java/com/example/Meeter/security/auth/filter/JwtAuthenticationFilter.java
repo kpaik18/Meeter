@@ -1,6 +1,7 @@
-package com.example.Meeter.security.config;
+package com.example.Meeter.security.auth.filter;
 
-import com.example.Meeter.security.user.UserService;
+import com.example.Meeter.security.auth.service.JwtService;
+import com.example.Meeter.security.auth.user.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

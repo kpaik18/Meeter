@@ -1,4 +1,4 @@
-package com.example.Meeter.security.user;
+package com.example.Meeter.security.auth.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

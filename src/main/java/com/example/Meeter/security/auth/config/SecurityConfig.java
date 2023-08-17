@@ -1,5 +1,6 @@
-package com.example.Meeter.security.config;
+package com.example.Meeter.security.auth.config;
 
+import com.example.Meeter.security.auth.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

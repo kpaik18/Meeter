@@ -1,4 +1,4 @@
-package com.example.Meeter.security.config;
+package com.example.Meeter.security.auth.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

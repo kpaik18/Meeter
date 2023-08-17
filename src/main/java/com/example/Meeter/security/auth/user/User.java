@@ -1,4 +1,4 @@
-package com.example.Meeter.security.user;
+package com.example.Meeter.security.auth.user;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.example.Meeter.security.user;
+package com.example.Meeter.security.auth.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.UserDetails;

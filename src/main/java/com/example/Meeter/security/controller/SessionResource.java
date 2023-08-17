@@ -1,6 +1,6 @@
 package com.example.Meeter.security.controller;
 
-import com.example.Meeter.security.config.JwtService;
+import com.example.Meeter.security.auth.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,4 +1,4 @@
-package com.example.Meeter.security;
+package com.example.Meeter.security.user;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,9 +10,9 @@ import java.util.Collection;
 @Setter
 @Getter
 @Builder
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "sec_user")
 public class User implements UserDetails {
     @Id

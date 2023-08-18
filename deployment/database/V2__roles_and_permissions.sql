@@ -51,3 +51,19 @@ insert into role_permission	(role_id, permission_id)
 values
     (1, 1),
     (2, 2);
+
+
+create table user_role(
+                          user_id bigint not null,
+                          role_id bigint not null,
+                          constraint fk_user_role_user
+                              foreign key (user_id)
+                                  references sec_user(id),
+                          constraint fk_user_role_role
+                              foreign key (role_id)
+                                  references role(id),
+                          constraint uk_user_role
+                              unique (user_id, role_id)
+);
+
+grant select, insert, update, delete on user_role to meeter_app;

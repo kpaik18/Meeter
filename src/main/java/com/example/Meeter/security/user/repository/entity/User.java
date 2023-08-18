@@ -3,9 +3,10 @@ package com.example.Meeter.security.user.repository.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
+import java.util.*;
 
 @Setter
 @Getter
@@ -23,10 +24,24 @@ public class User implements UserDetails {
     private String lastName;
     private String email;
     private String password;
+    @ManyToMany
+
+    private Set<Role> roles = new HashSet<>();
+
+    @JoinTable(name = "user_role",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id")})
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        for (var role : roles) {
+            var permissions = role.getPermissions();
+            for (var permission : permissions) {
+                authorities.add(new SimpleGrantedAuthority(permission.getCode()));
+            }
+        }
+        return authorities;
     }
 
     @Override

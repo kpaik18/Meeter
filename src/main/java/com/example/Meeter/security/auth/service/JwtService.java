@@ -21,25 +21,39 @@ public class JwtService {
 
     private static final String SECRET_KEY = "fd686eb0e4d4e60d4f60948d7702ef312b6e1c9b51bbbe924e2e19e8f7caf67bcc4fea313dc56c1326a79a2db6f0b5f23cf04db3aa5c059ad89bfcd9350e7692";
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    private static final int ACCESS_TOKEN_EXPIRATION_MINUTES = 5 * 60;
+
+    private static final int REFRESH_TOKEN_EXPIRATION_MINUTES = 60 * 60;
+
+
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, int expiration) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateAccessToken(UserDetails userDetails) {
+        return generateToken(new HashMap<>(), userDetails, ACCESS_TOKEN_EXPIRATION_MINUTES);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return generateToken(new HashMap<>(), userDetails, REFRESH_TOKEN_EXPIRATION_MINUTES);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
+
+    public boolean isTokenValid(String token) {
+        return !isTokenExpired(token);
+    }
+
 
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());

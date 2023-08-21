@@ -2,7 +2,9 @@ package com.example.Meeter.security.user.service;
 
 import com.example.Meeter.exception.BusinessException;
 import com.example.Meeter.security.auth.controller.dto.RegisterRequest;
+import com.example.Meeter.security.user.repository.RoleRepository;
 import com.example.Meeter.security.user.repository.UserRepository;
+import com.example.Meeter.security.user.repository.entity.Role;
 import com.example.Meeter.security.user.repository.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,13 +13,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Set;
 
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class UserService {
+    private static final String USER_ROLE_CODE = "USER";
+
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     public User lookupUser(String username) {
@@ -41,6 +47,8 @@ public class UserService {
         user.setFirstName(registerRequest.firstName());
         user.setLastName(registerRequest.lastName());
         user.setPassword(passwordEncoder.encode(registerRequest.password()));
+        Role role = roleRepository.findByCode(USER_ROLE_CODE);
+        user.setRoles(Set.of(role));
         userRepository.save(user);
     }
 

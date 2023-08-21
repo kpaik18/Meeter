@@ -6,13 +6,11 @@ import com.example.Meeter.security.user.repository.UserRepository;
 import com.example.Meeter.security.user.repository.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.Optional;
 
 
 @Service
@@ -21,14 +19,6 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public UserDetails lookupUserDetails(String username) {
-        Optional<UserDetails> userDetailsOptional = userRepository.findByEmail(username);
-        if (userDetailsOptional.isEmpty()) {
-            throw new BusinessException("username_or_password_is_invalid");
-        }
-        return userDetailsOptional.get();
-    }
 
     public User lookupUser(String username) {
         User user = userRepository.findUser(username);

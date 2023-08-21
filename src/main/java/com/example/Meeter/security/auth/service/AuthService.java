@@ -5,10 +5,9 @@ import com.example.Meeter.exception.SecurityViolationException;
 import com.example.Meeter.security.auth.controller.dto.LoginDTO;
 import com.example.Meeter.security.auth.controller.dto.RegisterRequest;
 import com.example.Meeter.security.auth.controller.dto.TokenDTO;
-import com.example.Meeter.security.user.repository.UserRepository;
+import com.example.Meeter.security.user.repository.entity.User;
 import com.example.Meeter.security.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class AuthService {
-    private final UserRepository userRepository;
-
     private final JwtService jwtService;
 
     private final PasswordEncoder passwordEncoder;
@@ -28,7 +25,7 @@ public class AuthService {
     public TokenDTO login(LoginDTO loginDTO) {
         String username = loginDTO.username();
         String password = loginDTO.password();
-        UserDetails user = userService.lookupUserDetails(username);
+        User user = userService.lookupUser(username);
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BusinessException("username_or_password_is_invalid");
         }
@@ -42,7 +39,7 @@ public class AuthService {
         if (!jwtService.isTokenValid(tokenDTO.refreshToken())) {
             throw new SecurityViolationException();
         }
-        UserDetails user = userService.lookupUserDetails(username);
+        User user = userService.lookupUser(username);
         return new TokenDTO(
                 jwtService.generateAccessToken(user),
                 jwtService.generateRefreshToken(user)

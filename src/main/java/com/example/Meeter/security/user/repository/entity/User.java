@@ -37,7 +37,7 @@ public class User implements UserDetails {
         for (var role : roles) {
             var permissions = role.getPermissions();
             for (var permission : permissions) {
-                authorities.add(new SimpleGrantedAuthority("ROLE_" + permission.getCode()));
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + permission.getCode().toLowerCase()));
             }
         }
         return authorities;

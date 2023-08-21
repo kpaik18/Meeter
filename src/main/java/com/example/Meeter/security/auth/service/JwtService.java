@@ -1,6 +1,7 @@
 package com.example.Meeter.security.auth.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -20,7 +21,7 @@ public class JwtService {
 
     private static final String SECRET_KEY = "fd686eb0e4d4e60d4f60948d7702ef312b6e1c9b51bbbe924e2e19e8f7caf67bcc4fea313dc56c1326a79a2db6f0b5f23cf04db3aa5c059ad89bfcd9350e7692";
 
-    private static final int ACCESS_TOKEN_EXPIRATION_MINUTES = 5 * 60;
+    private static final int ACCESS_TOKEN_EXPIRATION_MINUTES = 60 * 60;
 
     private static final int REFRESH_TOKEN_EXPIRATION_MINUTES = 60 * 60;
 
@@ -83,6 +84,7 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

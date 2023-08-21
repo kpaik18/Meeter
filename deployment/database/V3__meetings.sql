@@ -1,7 +1,7 @@
 create table meeting(
                         id bigint primary key,
                         owner_id bigint not null,
-                        participant_id bigint not null,
+                        participant_id bigint,
                         name varchar(255),
                         status varchar(255) not null,
                         start_time timestamp without time zone not null,

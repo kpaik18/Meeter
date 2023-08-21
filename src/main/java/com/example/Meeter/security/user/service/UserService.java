@@ -7,12 +7,11 @@ import com.example.Meeter.security.user.repository.UserRepository;
 import com.example.Meeter.security.user.repository.entity.Role;
 import com.example.Meeter.security.user.repository.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.Set;
 
 
@@ -52,8 +51,8 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public Collection<? extends GrantedAuthority> getUserAuthorities(String userEmail) {
-        User user = lookupUser(userEmail);
-        return user.getAuthorities();
+    public User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return lookupUser(username);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.Meeter.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,13 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleSecurityViolation(RuntimeException ex, WebRequest request) {
         SecurityContextHolder.clearContext();
         return handleExceptionInternal(ex, null, HttpHeaders.EMPTY, HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler(value = ExpiredJwtException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<Object> handleExpiredJWT(RuntimeException ex, WebRequest request) {
+        SecurityContextHolder.clearContext();
+        return handleExceptionInternal(ex, null, HttpHeaders.EMPTY, HttpStatus.UNAUTHORIZED, request);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

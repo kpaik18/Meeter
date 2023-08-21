@@ -28,7 +28,7 @@ public class AuthService {
     public TokenDTO login(LoginDTO loginDTO) {
         String username = loginDTO.username();
         String password = loginDTO.password();
-        UserDetails user = userService.lookupUser(username);
+        UserDetails user = userService.lookupUserDetails(username);
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BusinessException("username_or_password_is_invalid");
         }
@@ -42,7 +42,7 @@ public class AuthService {
         if (!jwtService.isTokenValid(tokenDTO.refreshToken())) {
             throw new SecurityViolationException();
         }
-        UserDetails user = userService.lookupUser(username);
+        UserDetails user = userService.lookupUserDetails(username);
         return new TokenDTO(
                 jwtService.generateAccessToken(user),
                 jwtService.generateRefreshToken(user)

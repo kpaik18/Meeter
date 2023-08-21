@@ -1,6 +1,7 @@
 package com.example.Meeter.security.auth.filter;
 
 import com.example.Meeter.security.auth.service.JwtService;
+import com.example.Meeter.security.user.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
 
+    private final UserService userService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -42,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         user,
                         null,
-                        user.getAuthorities()
+                        jwtService.getAuthorities(jwt)
                 );
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)

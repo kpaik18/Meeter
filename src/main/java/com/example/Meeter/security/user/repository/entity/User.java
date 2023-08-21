@@ -25,12 +25,11 @@ public class User implements UserDetails {
     private String email;
     private String password;
     @ManyToMany
-
-    private Set<Role> roles = new HashSet<>();
-
     @JoinTable(name = "user_role",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
+    private Set<Role> roles = new HashSet<>();
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -38,7 +37,7 @@ public class User implements UserDetails {
         for (var role : roles) {
             var permissions = role.getPermissions();
             for (var permission : permissions) {
-                authorities.add(new SimpleGrantedAuthority(permission.getCode()));
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + permission.getCode()));
             }
         }
         return authorities;

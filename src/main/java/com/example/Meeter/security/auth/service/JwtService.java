@@ -6,13 +6,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -30,6 +29,7 @@ public class JwtService {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
+                .setClaims(Map.of("roles", userDetails.getAuthorities()))
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000L * expiration))
@@ -54,7 +54,6 @@ public class JwtService {
         return !isTokenExpired(token);
     }
 
-
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
@@ -62,6 +61,17 @@ public class JwtService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
+    public List<SimpleGrantedAuthority> getAuthorities(String token) {
+        List<SimpleGrantedAuthority> result = new ArrayList<>();
+        Claims claims = extractAllClaims(token);
+        var objectList = (List<Object>) claims.get("roles");
+        for (var obj : objectList) {
+            result.add(new SimpleGrantedAuthority(((LinkedHashMap<String, String>) obj).get("authority")));
+        }
+        return result;
+    }
+
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

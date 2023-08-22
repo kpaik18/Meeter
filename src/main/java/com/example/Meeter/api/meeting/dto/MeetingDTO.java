@@ -1,7 +1,7 @@
 package com.example.Meeter.api.meeting.dto;
 
-import com.example.Meeter.core.meeting.repository.entity.Meeting;
 import com.example.Meeter.core.meeting.repository.entity.MeetingStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 
@@ -15,6 +15,7 @@ public record MeetingDTO(Long id,
                          @NotNull LocalDateTime start,
                          @NotNull LocalDateTime end) {
     @AssertTrue
+    @JsonIgnore
     public boolean isValidDates() {
         if (start.isAfter(end) || start.isEqual(end)) {
             return false;

@@ -30,7 +30,7 @@ public class MeetingResource {
     @GetMapping("/day")
     @RolesAllowed("user")
     public DayDTO getMeetingDay(@RequestParam(value = "date") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate day) {
-        return meetingService.getMeetingDay(day);
+        return meetingService.getMeetingDayForCurrentUser(day);
     }
 
     @GetMapping("/date-range")
@@ -39,7 +39,7 @@ public class MeetingResource {
                                            LocalDate startDate,
                                            @RequestParam(value = "endDate") @DateTimeFormat(pattern = "dd/MM/yyyy")
                                            LocalDate endDate) {
-        return meetingService.getMeetingDayRange(startDate, endDate);
+        return meetingService.getMeetingDayRangeForCurrentUser(startDate, endDate);
     }
 
     @PostMapping("/repeater")
@@ -47,4 +47,5 @@ public class MeetingResource {
     public void createRepeater(@RequestBody @Valid RepeaterDTO repeaterDTO) {
         meetingService.createRepeater(repeaterDTO);
     }
+
 }

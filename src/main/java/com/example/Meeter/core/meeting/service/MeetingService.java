@@ -4,6 +4,8 @@ import com.example.Meeter.api.meeting.dto.DayDTO;
 import com.example.Meeter.api.meeting.dto.MeetingDTO;
 import com.example.Meeter.api.meeting.dto.RepeaterDTO;
 import com.example.Meeter.api.meeting.dto.UserDTO;
+import com.example.Meeter.core.link.repository.entity.Link;
+import com.example.Meeter.core.link.service.LinkService;
 import com.example.Meeter.core.meeting.repository.MeetingRepository;
 import com.example.Meeter.core.meeting.repository.RepeaterRepository;
 import com.example.Meeter.core.meeting.repository.entity.Meeting;
@@ -31,6 +33,8 @@ public class MeetingService {
 
     private final RepeaterRepository repeaterRepository;
 
+    private final LinkService linkService;
+
     public void createMeeting(MeetingDTO dto) {
         Meeting meeting = new Meeting();
         meeting.setOwner(userService.getCurrentUser());
@@ -41,7 +45,7 @@ public class MeetingService {
         meetingRepository.save(meeting);
     }
 
-    public DayDTO getMeetingDay(LocalDate day) {
+    public DayDTO getMeetingDayForCurrentUser(LocalDate day) {
         User currentUser = userService.getCurrentUser();
         List<Meeting> dayMeetings = meetingRepository.getAllUserDayMeetingsOrderByStartDate(currentUser, day);
         List<Repeater> repeaters = repeaterRepository.findAllByUser(currentUser);
@@ -53,10 +57,13 @@ public class MeetingService {
         return new DayDTO(day, meetingDTOS);
     }
 
-    public List<DayDTO> getMeetingDayRange(LocalDate startDate, LocalDate endDate) {
-        User currentUser = userService.getCurrentUser();
-        List<Meeting> dayMeetings = meetingRepository.getAllUserDayMeetingsInRangeOrderByStartDate(currentUser, startDate, endDate);
-        List<Repeater> repeaters = repeaterRepository.findAllByUser(currentUser);
+    public List<DayDTO> getMeetingDayRangeForCurrentUser(LocalDate startDate, LocalDate endDate) {
+        return getMeetingDayRange(startDate, endDate, userService.getCurrentUser());
+    }
+
+    public List<DayDTO> getMeetingDayRange(LocalDate startDate, LocalDate endDate, User user) {
+        List<Meeting> dayMeetings = meetingRepository.getAllUserDayMeetingsInRangeOrderByStartDate(user, startDate, endDate);
+        List<Repeater> repeaters = repeaterRepository.findAllByUser(user);
         List<DayDTO> result = new ArrayList<>();
 
         LocalDate currentDate = startDate;
@@ -66,7 +73,7 @@ public class MeetingService {
             List<MeetingDTO> meetingDTOS = new ArrayList<>();
             if (bucket.size() > 0)
                 meetingDTOS = meetingDTOListFromMeetings(bucket.get(0).getStart().toLocalDate(), bucket);
-            meetingDTOS.addAll(getRepeaterMeetingDTOsForLocalDate(tmp, repeaters, currentUser));
+            meetingDTOS.addAll(getRepeaterMeetingDTOsForLocalDate(tmp, repeaters, user));
             meetingDTOS = orderMeetingDTOs(meetingDTOS);
             result.add(new DayDTO(tmp, meetingDTOS));
             currentDate = currentDate.plusDays(1);
@@ -85,7 +92,8 @@ public class MeetingService {
                     repeater.getName(),
                     MeetingStatus.OPEN,
                     day.atTime(repeater.getStartTime().toLocalTime()),
-                    day.atTime(repeater.getEndTime().toLocalTime())
+                    day.atTime(repeater.getEndTime().toLocalTime()),
+                    repeater.getId()
             ));
         }
         return result;
@@ -116,7 +124,8 @@ public class MeetingService {
                     meeting.getName(),
                     meeting.getStatus(),
                     meeting.getStart(),
-                    meeting.getEnd()));
+                    meeting.getEnd(),
+                    null));
         }
         return dayMeetingDTOs;
     }
@@ -139,5 +148,13 @@ public class MeetingService {
         repeater.setEndTime(dto.endTime());
         repeater.setWeekDayList(dto.weekDayList());
         repeaterRepository.save(repeater);
+    }
+
+    public List<DayDTO> getMeetingsByLink(String link) {
+        Link dbLink = linkService.getLink(link);
+        return getMeetingDayRange(
+                dbLink.getStartRange().toLocalDate(),
+                dbLink.getEndRange().toLocalDate(),
+                dbLink.getUser());
     }
 }

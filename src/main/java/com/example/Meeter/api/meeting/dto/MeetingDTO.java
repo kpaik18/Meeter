@@ -13,7 +13,8 @@ public record MeetingDTO(Long id,
                          @NotNull String name,
                          MeetingStatus status,
                          @NotNull LocalDateTime start,
-                         @NotNull LocalDateTime end) {
+                         @NotNull LocalDateTime end,
+                         Long repeaterId) {
     @AssertTrue
     @JsonIgnore
     public boolean isValidDates() {

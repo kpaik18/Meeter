@@ -18,6 +18,7 @@ public class Link {
     private Long id;
     @ManyToOne
     private User user;
+    private String link;
     @Column(name = "start_valid")
     private LocalDateTime startValid;
     @Column(name = "end_valid")

@@ -1,5 +1,6 @@
 create table meeting_link(
                              id bigint primary key,
+                             link varchar(255) not null,
                              user_id bigint not null,
                              start_valid timestamp without time zone not null,
                              end_valid timestamp without time zone not null,

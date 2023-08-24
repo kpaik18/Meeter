@@ -1,9 +1,6 @@
 package com.example.Meeter.core.meeting.service;
 
-import com.example.Meeter.api.meeting.dto.DayDTO;
-import com.example.Meeter.api.meeting.dto.MeetingDTO;
-import com.example.Meeter.api.meeting.dto.RepeaterDTO;
-import com.example.Meeter.api.meeting.dto.UserDTO;
+import com.example.Meeter.api.meeting.dto.*;
 import com.example.Meeter.core.link.repository.entity.Link;
 import com.example.Meeter.core.link.service.LinkService;
 import com.example.Meeter.core.meeting.repository.MeetingRepository;
@@ -12,6 +9,8 @@ import com.example.Meeter.core.meeting.repository.entity.Meeting;
 import com.example.Meeter.core.meeting.repository.entity.MeetingStatus;
 import com.example.Meeter.core.meeting.repository.entity.Repeater;
 import com.example.Meeter.core.meeting.repository.entity.WeekDay;
+import com.example.Meeter.exception.BusinessException;
+import com.example.Meeter.exception.SecurityViolationException;
 import com.example.Meeter.security.user.repository.entity.User;
 import com.example.Meeter.security.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -43,6 +43,14 @@ public class MeetingService {
         meeting.setStart(dto.start());
         meeting.setEnd(dto.end());
         meetingRepository.save(meeting);
+    }
+
+    private Meeting getMeeting(Long meetingId) {
+        Optional<Meeting> meetingOptional = meetingRepository.findById(meetingId);
+        if (meetingOptional.isEmpty()) {
+            throw new SecurityViolationException();
+        }
+        return meetingOptional.get();
     }
 
     public DayDTO getMeetingDayForCurrentUser(LocalDate day) {
@@ -156,5 +164,31 @@ public class MeetingService {
                 dbLink.getStartRange().toLocalDate(),
                 dbLink.getEndRange().toLocalDate(),
                 dbLink.getUser());
+    }
+
+    public void reserveOtherUsersMeeting(ReserveMeetingRequest reserveMeetingRequest) {
+        Link link = linkService.getLink(reserveMeetingRequest.link());
+        LocalDate reserveDate = reserveMeetingRequest.date();
+        if (reserveDate.isBefore(link.getStartRange().toLocalDate()) || reserveDate.isAfter(link.getEndRange().toLocalDate())) {
+            throw new BusinessException("reserve_date_is_invalid_for_link");
+        }
+        if (reserveMeetingRequest.meetingId() != null) {
+            reserveMeetingByMeetingId(reserveMeetingRequest);
+        }
+        if (reserveMeetingRequest.repeaterId() != null) {
+            reserveMeetingByRepeaterId(reserveMeetingRequest);
+        }
+    }
+
+    private void reserveMeetingByRepeaterId(ReserveMeetingRequest reserveMeetingRequest) {
+
+    }
+
+    private void reserveMeetingByMeetingId(ReserveMeetingRequest reserveMeetingRequest) {
+        Meeting meeting = getMeeting(reserveMeetingRequest.meetingId());
+        if (meeting.getStatus().equals(MeetingStatus.RESERVED)) {
+            throw new BusinessException("meeting_already_reserved");
+        }
+        meeting.setStatus(MeetingStatus.RESERVED);
     }
 }

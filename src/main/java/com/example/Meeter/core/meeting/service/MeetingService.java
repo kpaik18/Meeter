@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -51,6 +52,14 @@ public class MeetingService {
             throw new SecurityViolationException();
         }
         return meetingOptional.get();
+    }
+
+    private Repeater getRepeater(Long repeaterId) {
+        Optional<Repeater> repeaterOptional = repeaterRepository.findById(repeaterId);
+        if (repeaterOptional.isEmpty()) {
+            throw new SecurityViolationException();
+        }
+        return repeaterOptional.get();
     }
 
     public DayDTO getMeetingDayForCurrentUser(LocalDate day) {
@@ -181,13 +190,32 @@ public class MeetingService {
     }
 
     private void reserveMeetingByRepeaterId(ReserveMeetingRequest reserveMeetingRequest) {
-
+        LocalDate reserveDate = reserveMeetingRequest.date();
+        Long repeaterId = reserveMeetingRequest.repeaterId();
+        Repeater repeater = getRepeater(repeaterId);
+        String reserveDateWeekDay = String.valueOf(reserveDate.getDayOfWeek());
+        Set<WeekDay> repeaterDays = repeater.getWeekDayList();
+        if (!repeaterDays.contains(WeekDay.valueOf(reserveDateWeekDay))) {
+            throw new BusinessException("invalid_day_for_repeater_meeting");
+        }
+        Meeting meetingByRepeater = new Meeting();
+        meetingByRepeater.setName(repeater.getName());
+        meetingByRepeater.setOwner(repeater.getUser());
+        meetingByRepeater.setStart(reserveDate.atTime(repeater.getStartTime().toLocalTime()));
+        meetingByRepeater.setEnd(reserveDate.atTime(repeater.getEndTime().toLocalTime()));
+        meetingByRepeater.setParticipant(userService.getCurrentUser());
+        meetingByRepeater.setStatus(MeetingStatus.RESERVED);
+        meetingByRepeater.setRepeater(repeater);
+        meetingRepository.save(meetingByRepeater);
     }
 
     private void reserveMeetingByMeetingId(ReserveMeetingRequest reserveMeetingRequest) {
         Meeting meeting = getMeeting(reserveMeetingRequest.meetingId());
         if (meeting.getStatus().equals(MeetingStatus.RESERVED)) {
             throw new BusinessException("meeting_already_reserved");
+        }
+        if (!meeting.getStart().toLocalDate().equals(reserveMeetingRequest.date())) {
+            throw new BusinessException("meeting_date_not_valid");
         }
         meeting.setStatus(MeetingStatus.RESERVED);
     }

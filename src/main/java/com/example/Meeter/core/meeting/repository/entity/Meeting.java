@@ -29,4 +29,6 @@ public class Meeting {
     private LocalDateTime start;
     @Column(name = "end_time")
     private LocalDateTime end;
+    @ManyToOne
+    private Repeater repeater;
 }

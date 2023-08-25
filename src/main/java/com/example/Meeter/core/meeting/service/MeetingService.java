@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -62,13 +63,18 @@ public class MeetingService {
         return repeaterOptional.get();
     }
 
-    public DayDTO getMeetingDayForCurrentUser(LocalDate day) {
+    public DayDTO  getMeetingDayForCurrentUser(LocalDate day) {
         User currentUser = userService.getCurrentUser();
         List<Meeting> dayMeetings = meetingRepository.getAllUserDayMeetingsOrderByStartDate(currentUser, day);
         List<Repeater> repeaters = repeaterRepository.findAllByUser(currentUser);
 
+        Set<Long> reservedRepeatersOnDate = dayMeetings.stream()
+                .filter(m -> m.getRepeater() != null)
+                .map(m -> m.getRepeater().getId())
+                .collect(Collectors.toSet());
+
         List<MeetingDTO> meetingDTOS = meetingDTOListFromMeetings(day, dayMeetings);
-        meetingDTOS.addAll(getRepeaterMeetingDTOsForLocalDate(day, repeaters, currentUser));
+        meetingDTOS.addAll(getRepeaterMeetingDTOsForLocalDate(day, repeaters, currentUser, reservedRepeatersOnDate));
         meetingDTOS = orderMeetingDTOs(meetingDTOS);
 
         return new DayDTO(day, meetingDTOS);
@@ -90,7 +96,11 @@ public class MeetingService {
             List<MeetingDTO> meetingDTOS = new ArrayList<>();
             if (bucket.size() > 0)
                 meetingDTOS = meetingDTOListFromMeetings(bucket.get(0).getStart().toLocalDate(), bucket);
-            meetingDTOS.addAll(getRepeaterMeetingDTOsForLocalDate(tmp, repeaters, user));
+            Set<Long> reservedRepeaters = bucket.stream()
+                    .filter(m -> m.getRepeater() != null)
+                    .map(m -> m.getRepeater().getId())
+                    .collect(Collectors.toSet());
+            meetingDTOS.addAll(getRepeaterMeetingDTOsForLocalDate(tmp, repeaters, user, reservedRepeaters));
             meetingDTOS = orderMeetingDTOs(meetingDTOS);
             result.add(new DayDTO(tmp, meetingDTOS));
             currentDate = currentDate.plusDays(1);
@@ -98,10 +108,15 @@ public class MeetingService {
         return result;
     }
 
-    private List<MeetingDTO> getRepeaterMeetingDTOsForLocalDate(LocalDate day, List<Repeater> repeaters, User currentUser) {
+    private List<MeetingDTO> getRepeaterMeetingDTOsForLocalDate(LocalDate day,
+                                                                List<Repeater> repeaters,
+                                                                User currentUser,
+                                                                Set<Long> reservedRepeaters) {
         List<MeetingDTO> result = new ArrayList<>();
         List<Repeater> dayRepeaters = repeaters.stream().filter(r -> r.getWeekDayList().contains(WeekDay.valueOf(day.getDayOfWeek().name()))).toList();
         for (var repeater : dayRepeaters) {
+            if (reservedRepeaters.contains(repeater.getId()))
+                continue;
             result.add(new MeetingDTO(
                     null,
                     getUserDTOFromUser(currentUser),
@@ -185,11 +200,11 @@ public class MeetingService {
             reserveMeetingByMeetingId(reserveMeetingRequest);
         }
         if (reserveMeetingRequest.repeaterId() != null) {
-            reserveMeetingByRepeaterId(reserveMeetingRequest);
+            reserveMeetingByRepeaterId(reserveMeetingRequest, link);
         }
     }
 
-    private void reserveMeetingByRepeaterId(ReserveMeetingRequest reserveMeetingRequest) {
+    private void reserveMeetingByRepeaterId(ReserveMeetingRequest reserveMeetingRequest, Link link) {
         LocalDate reserveDate = reserveMeetingRequest.date();
         Long repeaterId = reserveMeetingRequest.repeaterId();
         Repeater repeater = getRepeater(repeaterId);
@@ -197,6 +212,9 @@ public class MeetingService {
         Set<WeekDay> repeaterDays = repeater.getWeekDayList();
         if (!repeaterDays.contains(WeekDay.valueOf(reserveDateWeekDay))) {
             throw new BusinessException("invalid_day_for_repeater_meeting");
+        }
+        if (meetingRepository.existsMeetingOnRepeaterOnDate(reserveDate, repeaterId, link.getUser())) {
+            throw new BusinessException("repeater_meeting_already_exists_on_that_date");
         }
         Meeting meetingByRepeater = new Meeting();
         meetingByRepeater.setName(repeater.getName());

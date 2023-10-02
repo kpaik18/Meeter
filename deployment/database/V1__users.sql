@@ -6,7 +6,7 @@ create table sec_user(
                          password varchar(255)
 );
 
-grant select, insert, update, delete on sec_user to meeter_app
+grant select, insert, update, delete on sec_user to meeter_app;
 
 create sequence seq_sec_user start with 1000;
 

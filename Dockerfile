@@ -18,3 +18,5 @@ ENTRYPOINT ["java", "-jar", "meeter.jar"]
 
 # Run
 # docker run -p 8080:8080 meeter
+
+# https://github.com/TakiRahal/spring-boot-render

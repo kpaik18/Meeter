@@ -12,3 +12,9 @@ FROM openjdk:17-jdk-slim
 COPY --from=build /target/Meeter-0.0.1-SNAPSHOT.jar meeter.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "meeter.jar"]
+
+# Build
+# docker build -t meeter .
+
+# Run
+# docker run -p 8080:8080 meeter

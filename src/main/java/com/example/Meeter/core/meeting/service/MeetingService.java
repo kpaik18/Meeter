@@ -1,6 +1,6 @@
 package com.example.Meeter.core.meeting.service;
 
-import com.example.Meeter.api.meeting.dto.*;
+import com.example.Meeter.core.meeting.controller.dto.*;
 import com.example.Meeter.core.link.repository.entity.Link;
 import com.example.Meeter.core.link.service.LinkService;
 import com.example.Meeter.core.meeting.repository.MeetingRepository;
@@ -63,7 +63,7 @@ public class MeetingService {
         return repeaterOptional.get();
     }
 
-    public DayDTO  getMeetingDayForCurrentUser(LocalDate day) {
+    public DayDTO getMeetingDayForCurrentUser(LocalDate day) {
         User currentUser = userService.getCurrentUser();
         List<Meeting> dayMeetings = meetingRepository.getAllUserDayMeetingsOrderByStartDate(currentUser, day);
         List<Repeater> repeaters = repeaterRepository.findAllByUser(currentUser);

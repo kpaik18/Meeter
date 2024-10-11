@@ -1,4 +1,4 @@
-package com.example.Meeter.api.meeting.dto;
+package com.example.Meeter.core.meeting.controller.dto;
 
 import com.example.Meeter.core.meeting.repository.entity.MeetingStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;

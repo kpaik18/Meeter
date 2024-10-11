@@ -1,7 +1,7 @@
 package com.example.Meeter.core.link.service;
 
-import com.example.Meeter.api.link.dto.LinkDTO;
-import com.example.Meeter.api.link.dto.LinkGenerationRequest;
+import com.example.Meeter.core.link.controller.dto.LinkDTO;
+import com.example.Meeter.core.link.controller.dto.LinkGenerationRequest;
 import com.example.Meeter.core.link.repository.LinkRepository;
 import com.example.Meeter.core.link.repository.entity.Link;
 import com.example.Meeter.exception.BusinessException;

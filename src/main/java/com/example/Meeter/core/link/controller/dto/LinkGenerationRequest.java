@@ -1,4 +1,4 @@
-package com.example.Meeter.api.link.dto;
+package com.example.Meeter.core.link.controller.dto;
 
 import java.time.LocalDate;
 

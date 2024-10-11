@@ -1,4 +1,4 @@
-package com.example.Meeter.api.meeting.dto;
+package com.example.Meeter.core.meeting.controller.dto;
 
 public record UserDTO (Long id,
                        String firstName,

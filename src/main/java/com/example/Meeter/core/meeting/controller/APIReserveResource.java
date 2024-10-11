@@ -1,7 +1,7 @@
-package com.example.Meeter.api.meeting;
+package com.example.Meeter.core.meeting.controller;
 
-import com.example.Meeter.api.meeting.dto.DayDTO;
-import com.example.Meeter.api.meeting.dto.ReserveMeetingRequest;
+import com.example.Meeter.core.meeting.controller.dto.DayDTO;
+import com.example.Meeter.core.meeting.controller.dto.ReserveMeetingRequest;
 import com.example.Meeter.core.meeting.service.MeetingService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("api/reserve")
 @RequiredArgsConstructor
 @Validated
-public class ReserveResource {
+public class APIReserveResource {
     private final MeetingService meetingService;
 
     @GetMapping

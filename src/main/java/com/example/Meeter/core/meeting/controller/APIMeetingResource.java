@@ -1,8 +1,8 @@
-package com.example.Meeter.api.meeting;
+package com.example.Meeter.core.meeting.controller;
 
-import com.example.Meeter.api.meeting.dto.DayDTO;
-import com.example.Meeter.api.meeting.dto.MeetingDTO;
-import com.example.Meeter.api.meeting.dto.RepeaterDTO;
+import com.example.Meeter.core.meeting.controller.dto.DayDTO;
+import com.example.Meeter.core.meeting.controller.dto.MeetingDTO;
+import com.example.Meeter.core.meeting.controller.dto.RepeaterDTO;
 import com.example.Meeter.core.meeting.service.MeetingService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
@@ -18,7 +18,7 @@ import java.util.List;
 @RequestMapping("api/meeting")
 @RequiredArgsConstructor
 @Validated
-public class MeetingResource {
+public class APIMeetingResource {
     private final MeetingService meetingService;
 
     @PostMapping

@@ -1,7 +1,7 @@
-package com.example.Meeter.api.link;
+package com.example.Meeter.core.link.controller;
 
-import com.example.Meeter.api.link.dto.LinkDTO;
-import com.example.Meeter.api.link.dto.LinkGenerationRequest;
+import com.example.Meeter.core.link.controller.dto.LinkDTO;
+import com.example.Meeter.core.link.controller.dto.LinkGenerationRequest;
 import com.example.Meeter.core.link.service.LinkService;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api/link")
 @RequiredArgsConstructor
-public class LinkResource {
+public class APILinkResource {
     private final LinkService linkService;
 
     @PostMapping

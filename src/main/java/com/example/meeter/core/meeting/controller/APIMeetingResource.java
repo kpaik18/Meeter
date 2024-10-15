@@ -30,7 +30,7 @@ public class APIMeetingResource {
     @GetMapping("/day")
     @RolesAllowed("user")
     public DayDTO getMeetingDay(@RequestParam(value = "date") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate day) {
-        return meetingService.getMeetingDayForCurrentUser(day);
+        return meetingService.getMeetingDayRangeForCurrentUser(day, day.plusDays(1)).getFirst();
     }
 
     @GetMapping("/date-range")

@@ -58,23 +58,6 @@ public class MeetingService {
                 .orElseThrow(SecurityViolationException::new);
     }
 
-    public DayDTO getMeetingDayForCurrentUser(LocalDate day) {
-        User currentUser = userService.getCurrentUser();
-        List<Meeting> dayMeetings = meetingRepository.getAllUserDayMeetingsOrderByStartDate(currentUser, day);
-        List<Repeater> repeaters = repeaterRepository.findAllByUser(currentUser);
-
-        Set<Long> reservedRepeatersOnDate = dayMeetings.stream()
-                .filter(m -> m.getRepeater() != null)
-                .map(m -> m.getRepeater().getId())
-                .collect(Collectors.toSet());
-
-        List<MeetingDTO> meetingDTOS = meetingDTOListFromMeetings(day, dayMeetings);
-        meetingDTOS.addAll(getRepeaterMeetingDTOsForLocalDate(day, repeaters, currentUser, reservedRepeatersOnDate));
-        meetingDTOS = orderMeetingDTOs(meetingDTOS);
-
-        return new DayDTO(day, meetingDTOS);
-    }
-
     public List<DayDTO> getMeetingDayRangeForCurrentUser(LocalDate startDate, LocalDate endDate) {
         return getMeetingDayRange(startDate, endDate, userService.getCurrentUser());
     }
@@ -87,26 +70,33 @@ public class MeetingService {
         LocalDate currentDate = startDate;
         while (currentDate.isBefore(endDate)) {
             LocalDate tmp = currentDate;
-            List<Meeting> bucket = dayMeetings.stream().filter(m -> m.getStart().toLocalDate().equals(tmp)).toList();
-            List<MeetingDTO> meetingDTOS = new ArrayList<>();
-            if (!bucket.isEmpty())
-                meetingDTOS = meetingDTOListFromMeetings(bucket.get(0).getStart().toLocalDate(), bucket);
-            Set<Long> reservedRepeaters = bucket.stream()
-                    .filter(m -> m.getRepeater() != null)
-                    .map(m -> m.getRepeater().getId())
-                    .collect(Collectors.toSet());
-            meetingDTOS.addAll(getRepeaterMeetingDTOsForLocalDate(tmp, repeaters, user, reservedRepeaters));
-            meetingDTOS = orderMeetingDTOs(meetingDTOS);
-            result.add(new DayDTO(tmp, meetingDTOS));
+            DayDTO day = getDayMeetings(currentDate,
+                    dayMeetings.stream().filter(m -> m.getStart().toLocalDate().equals(tmp)).toList(),
+                    repeaters,
+                    user);
+            result.add(day);
             currentDate = currentDate.plusDays(1);
         }
         return result;
     }
 
-    private List<MeetingDTO> getRepeaterMeetingDTOsForLocalDate(LocalDate day,
-                                                                List<Repeater> repeaters,
-                                                                User currentUser,
-                                                                Set<Long> reservedRepeaters) {
+    private DayDTO getDayMeetings(LocalDate currentDate, List<Meeting> dayMeetings, List<Repeater> repeaters, User user) {
+        List<MeetingDTO> meetingDTOS = new ArrayList<>();
+        if (!dayMeetings.isEmpty())
+            meetingDTOS = meetingDTOListFromMeetings(dayMeetings);
+        Set<Long> reservedRepeaters = dayMeetings.stream()
+                .filter(m -> m.getRepeater() != null)
+                .map(m -> m.getRepeater().getId())
+                .collect(Collectors.toSet());
+        meetingDTOS.addAll(getNotReservedRepeaterMeetingDTOsForLocalDate(currentDate, repeaters, user, reservedRepeaters));
+        meetingDTOS = orderMeetingDTOs(meetingDTOS);
+        return new DayDTO(currentDate, meetingDTOS);
+    }
+
+    private List<MeetingDTO> getNotReservedRepeaterMeetingDTOsForLocalDate(LocalDate day,
+                                                                           List<Repeater> repeaters,
+                                                                           User currentUser,
+                                                                           Set<Long> reservedRepeaters) {
         List<MeetingDTO> result = new ArrayList<>();
         List<Repeater> dayRepeaters = repeaters.stream().filter(r -> r.getWeekDayList().contains(WeekDay.valueOf(day.getDayOfWeek().name()))).toList();
         for (var repeater : dayRepeaters) {
@@ -140,7 +130,7 @@ public class MeetingService {
     }
 
 
-    private List<MeetingDTO> meetingDTOListFromMeetings(LocalDate day, List<Meeting> meetings) {
+    private List<MeetingDTO> meetingDTOListFromMeetings(List<Meeting> meetings) {
         List<MeetingDTO> dayMeetingDTOs = new ArrayList<>();
         for (var meeting : meetings) {
             UserDTO owner = getUserDTOFromUser(meeting.getOwner());

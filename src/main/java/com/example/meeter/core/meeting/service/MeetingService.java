@@ -1,8 +1,8 @@
 package com.example.meeter.core.meeting.service;
 
-import com.example.meeter.core.meeting.controller.dto.*;
 import com.example.meeter.core.link.repository.entity.Link;
 import com.example.meeter.core.link.service.LinkService;
+import com.example.meeter.core.meeting.controller.dto.*;
 import com.example.meeter.core.meeting.repository.MeetingRepository;
 import com.example.meeter.core.meeting.repository.RepeaterRepository;
 import com.example.meeter.core.meeting.repository.entity.Meeting;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,19 +47,15 @@ public class MeetingService {
     }
 
     private Meeting getMeeting(Long meetingId) {
-        Optional<Meeting> meetingOptional = meetingRepository.findById(meetingId);
-        if (meetingOptional.isEmpty()) {
-            throw new SecurityViolationException();
-        }
-        return meetingOptional.get();
+        return meetingRepository
+                .findById(meetingId)
+                .orElseThrow(SecurityViolationException::new);
     }
 
     private Repeater getRepeater(Long repeaterId) {
-        Optional<Repeater> repeaterOptional = repeaterRepository.findById(repeaterId);
-        if (repeaterOptional.isEmpty()) {
-            throw new SecurityViolationException();
-        }
-        return repeaterOptional.get();
+        return repeaterRepository
+                .findById(repeaterId)
+                .orElseThrow(SecurityViolationException::new);
     }
 
     public DayDTO getMeetingDayForCurrentUser(LocalDate day) {

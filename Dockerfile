@@ -3,7 +3,7 @@
 #
 FROM maven:3.8.2-eclipse-temurin-17 AS build
 COPY . .
-RUN mvn clean package -Pprod -DskipTests
+RUN mvn clean package -DskipTests
 
 #
 # Package stage
